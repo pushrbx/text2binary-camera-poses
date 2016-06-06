@@ -1,21 +1,41 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Windows.Forms;
 
 namespace Text2BinaryCameraPoses
 {
-    class Program
+    internal class Program
     {
-        static int Main(string[] args)
+        [STAThread]
+        private static int Main(string[] args)
         {
-            var filename = @"z:\ply\SCENE_PRIOR_GREATCENTRAL_RUN1_1_plyFiles\Pose\AbsolutePoses.txt";
+            var dialog = new OpenFileDialog
+            {
+                Multiselect = false,
+                CheckFileExists = true
+            };
+
+            var filename = "";
+            if (dialog.ShowDialog() == DialogResult.OK)
+            {
+                filename = dialog.SafeFileName;
+            }
+            else
+            {
+                Console.WriteLine("no file selected. exiting...");
+
+                return 1;
+            }
 
             if (!File.Exists(filename))
                 return 1;
 
+            Debug.Assert(filename != null, "filename != null");
             var lines = File.ReadAllLines(filename);
             var poses = new List<Pose>();
             foreach (var line in lines)
@@ -62,11 +82,12 @@ namespace Text2BinaryCameraPoses
                 bw.Flush();
             }
 
+            Console.WriteLine("Results has been written to output.dat in the current working directory.");
             return 0;
         }
     }
 
-    class Pose
+    internal class Pose
     {
         public long TimeStamp { get; set; }
 
